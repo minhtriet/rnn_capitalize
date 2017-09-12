@@ -9,23 +9,28 @@
 
 import numpy as np
 
-H_WIDTH = 52
+VOCAB_SIZE = 52
+HIDDEN_NEURON_SIZE = 20
+UNROLL_LENGTH = 50
 
 class RNN:
 
     def init(data, result):
         self.x = data
         self.y = result
-        self.w_hh = np.random.rand(1, H_WIDTH)
-        self.w_hy = np.random.rand(H_WIDTH, 1)
+        self.w_xh = np.random.rand(HIDDEN_NEURON_SIZE, VOCAB_SIZE) 
+        self.w_hh = np.random.rand(HIDDEN_NEURON_SIZE, HIDDEN_NEURON_SIZE)
+        self.w_hy = np.random.rand(VOCAB_SIZE, HIDDEN_NEURON_SIZE)  # TODO but why HIDDEN_NEURON_SIZE
+        self.b_hh = np.random.rand(HIDDEN_NEURON_SIZE, 1)
+        self.b_hy = np.random.rand(VOCAB_SIZE, 1)
 
     def backprop(loss):
         dL_o = self.y[t]
 
 
     def step(x):
-        h = tanh(np.dot(w_hh, h) + np.dot(w_xh, x))
-        y = tanh(np.dot(w_hy, h))
+        h = tanh(np.dot(self.w_hh, h) + np.dot(self.w_xh, x))
+        y = tanh(np.dot(self.w_hy, h))
         return y
 
     def softmax(x):
