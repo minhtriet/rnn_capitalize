@@ -15,9 +15,7 @@ UNROLL_LENGTH = 50
 
 class RNN:
 
-    def init(data, result):
-        self.x = data
-        self.y = result
+    def __init__(self):
         self.w_xh = np.random.rand(HIDDEN_NEURON_SIZE, VOCAB_SIZE) 
         self.w_hh = np.random.rand(HIDDEN_NEURON_SIZE, HIDDEN_NEURON_SIZE)
         self.w_hy = np.random.rand(VOCAB_SIZE, HIDDEN_NEURON_SIZE)  # TODO but why HIDDEN_NEURON_SIZE
@@ -48,6 +46,14 @@ class RNN:
                 return
             back_prop(loss)
 
-rnn = RNN([1,2,3],[4,5,6])
+data = open('input.txt', 'r').read() # should be simple plain text file
+result = open('result.txt', 'r').read()
+chars = list(set(data))
+data_size, vocab_size = len(data), len(chars)
+print 'data has %d characters, %d unique.' % (data_size, vocab_size)
+char_to_ix = { ch:i for i,ch in enumerate(chars) }
+ix_to_char = { i:ch for i,ch in enumerate(chars) }
+
+rnn = RNN()
 rnn.run()
 
