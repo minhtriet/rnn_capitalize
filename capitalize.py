@@ -1,10 +1,12 @@
-# x
-# ↓ U
-# h
-# ↓ V
-# o
+#  x
+#  |
+# \|/ U
+#  h
+#  |
+# \|/ V
+#  o
 
-# o_t → h_h+1
+# o_t -> h_h+1
 #     W
 
 import numpy as np
@@ -23,9 +25,8 @@ class RNN:
         self.b_hy = np.random.rand(VOCAB_SIZE, 1)
         self.loss = 0
 
-    def backprop(loss):
 
-    def forward_step(x, target):
+    def step(x, target):
         h = np.tanh(np.dot(self.w_hh, h) + np.dot(self.w_xh, x))
         y = np.dot(self.w_hy, h)
         predict = softmax(y)
@@ -50,9 +51,8 @@ ix_to_char = { i:ch for i,ch in enumerate(chars) }
 
 rnn = RNN()
 for i in data:              # TODO why while true?
-    onehot_encode = np.zeros(i, VOCAB_SIZE)
-    for j in i:
-        onehot_encode[i][ char_to_ix[j] ] = 1
+    onehot_encode = np.zeros([len(i), VOCAB_SIZE])
+    for index, j in enumerate(i):
+        onehot_encode[index][ char_to_ix[j] ] = 1
     loss = rnn.step(onehot_encode)
-    back_prop(loss)
 
