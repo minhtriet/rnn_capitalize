@@ -12,7 +12,7 @@ import numpy as np
 VOCAB_SIZE = 52
 HIDDEN_NEURON_SIZE = 20
 UNROLL_LENGTH = 50
-
+CLASSES = 4
 class RNN:
 
     def __init__(self):
@@ -21,30 +21,24 @@ class RNN:
         self.w_hy = np.random.rand(VOCAB_SIZE, HIDDEN_NEURON_SIZE)  # TODO but why HIDDEN_NEURON_SIZE
         self.b_hh = np.random.rand(HIDDEN_NEURON_SIZE, 1)
         self.b_hy = np.random.rand(VOCAB_SIZE, 1)
+        self.loss = 0
 
     def backprop(loss):
-        dL_o = self.y[t]
 
-
-    def step(x):
-        h = tanh(np.dot(self.w_hh, h) + np.dot(self.w_xh, x))
-        y = tanh(np.dot(self.w_hy, h))
-        return y
+    def forward_step(x, target):
+        h = np.tanh(np.dot(self.w_hh, h) + np.dot(self.w_xh, x))
+        y = np.dot(self.w_hy, h)
+        predict = softmax(y)
+        loss = -np.log(target * predict)
+        
+        # backward
+        dL_o = 1 - predict 
+        return loss 
 
     def softmax(x):
         e_x = np.exp(x - max(x))
         return x / e_x.sum()
 
-    def compute_loss(predict):
-        return np.log(softmax(x))
-
-    def run():
-        while True:
-            predict = step(self.x)
-            loss = compute_loss(predict)
-            if loss < exp(-6):
-                return
-            back_prop(loss)
 
 data = open('input.txt', 'r').read() # should be simple plain text file
 result = open('result.txt', 'r').read()
@@ -55,5 +49,10 @@ char_to_ix = { ch:i for i,ch in enumerate(chars) }
 ix_to_char = { i:ch for i,ch in enumerate(chars) }
 
 rnn = RNN()
-rnn.run()
+for i in data:              # TODO why while true?
+    onehot_encode = np.zeros(i, VOCAB_SIZE)
+    for j in i:
+        onehot_encode[i][ char_to_ix[j] ] = 1
+    loss = rnn.step(onehot_encode)
+    back_prop(loss)
 
