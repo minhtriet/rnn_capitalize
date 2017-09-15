@@ -16,32 +16,49 @@ import string
 VOCAB_SIZE = 26
 HIDDEN_NEURON_SIZE = 20
 UNROLL_LENGTH = 50
-CLASSES = 4
+CLASSES = 11 
+ETA = 0.0001
+
+def softmax(x):
+    e_x = np.exp(x - max(x))
+    return x / e_x.sum()
+
 class RNN:
 
     def __init__(self):
-        self.w_xh = np.random.rand(VOCAB_SIZE, HIDDEN_NEURON_SIZE)
-        self.w_hh = np.random.rand(HIDDEN_NEURON_SIZE, HIDDEN_NEURON_SIZE)
-        self.w_hy = np.random.rand(HIDDEN_NEURON_SIZE, CLASSES)  # TODO but why HIDDEN_NEURON_SIZE
-        self.b_h = np.random.rand(1, HIDDEN_NEURON_SIZE)
-        self.b_y = np.random.rand(1, VOCAB_SIZE)
-        self.h = np.zeros([1, HIDDEN_NEURON_SIZE])
+        self.w_xh = np.random.rand(VOCAB_SIZE, HIDDEN_NEURON_SIZE) * 0.01
+        self.w_hh = np.random.rand(HIDDEN_NEURON_SIZE, HIDDEN_NEURON_SIZE) * 0.01
+        self.w_hy = np.random.rand(HIDDEN_NEURON_SIZE, CLASSES) * 0.01  # TODO but why HIDDEN_NEURON_SIZE
+        self.b_h = np.random.rand(1, HIDDEN_NEURON_SIZE) * 0.01
+        self.b_y = np.random.rand(1, CLASSES) * 0.01
         self.loss = 0
 
     def step(self, data, target):
-        for x in data:
-            pdb.set_trace()
-            self.h = np.tanh(np.dot(self.h, self.w_hh) + np.dot(x, self.w_xh) + self.b_h)
-            y = np.dot(self.w_hy, self.h) + self.b_y
+        h[-1] = np.zeros([1, HIDDEN_NEURON_SIZE])
+        for i in reversed(xrange(len(data))):        
+            x[i] = np.zeros([1, VOCAB_SIZE])  # onehot
+            x[0][[char_to_ix[ data[i] ]]] = 1
+            h[i] = np.tanh(np.dot(h[i-1], self.w_hh) + np.dot(x[i], self.w_xh) + self.b_h)
+            y = np.dot(h[i], self.w_hy) + self.b_y
             predict = softmax(y)
-            loss += -np.log(target * predict)
+            self.loss += -np.log(predict[0, target])
         # backward
-        dL_o = 1 - predict
-        return loss
-
-    def softmax(x):
-        e_x = np.exp(x - max(x))
-        return x / e_x.sum()
+        dWxh, dWhh, dWhy = np.zeros_like(Wxh), np.zeros_like(Whh), np.zeros_like(Why)
+        dbh, dby = np.zeros_like(bh), np.zeros_like(by)
+        dhnext = np.zeros_like(h[0])
+        for i in reversed(xrange(len(data))):        
+            # backward
+            dy = np.copy(predict)
+            dy[ target ] -= 1       # softmax derivative
+            dWhy = np.dot(self.w_hy.T, dy)) 
+            dby += dy
+            dh = np.dot(Why.T, dy) + dhnext
+            dhraw = (1 - np.square(h[i])) * dh
+            dbh += dhraw
+            dWhh += dhraw
+            dWxh = 1 - np.square(h[i]) * x[i]
+            
+            return loss
 
 data = open('input.txt', 'r').readlines() # should be simple plain text file
 result = open('result.txt', 'r').readlines()
@@ -49,8 +66,4 @@ char_to_ix = dict(zip(string.ascii_lowercase, range(0,26)))
 rnn = RNN()
 for index_i, sentence in enumerate(data):              # TODO why while true?
     print "Step %d" % index_i
-    sentence = sentence.strip()
-    onehot_encode = np.zeros([len(sentence), 1, VOCAB_SIZE])
-    for index, j in enumerate(sentence):
-        onehot_encode[index][1][ char_to_ix[j] ] = 1
-    loss = rnn.step(onehot_encode, result[index_i])
+    loss = rnn.step(sentence.strip(), int(result[index_i]))
