@@ -34,23 +34,24 @@ class RNN:
         self.loss = 0
 
     def step(self, data, target):
+        h, x = {}, {}
         h[-1] = np.zeros([1, HIDDEN_NEURON_SIZE])
-        for i in reversed(xrange(len(data))):
+        for i in xrange(len(data)):
             x[i] = np.zeros([1, VOCAB_SIZE])  # onehot
-            x[0][[char_to_ix[ data[i] ]]] = 1
+            x[i][0, char_to_ix[ data[i] ]] = 1
             h[i] = np.tanh(np.dot(h[i-1], self.w_hh) + np.dot(x[i], self.w_xh) + self.b_h)
             y = np.dot(h[i], self.w_hy) + self.b_y
             predict = softmax(y)
             self.loss += -np.log(predict[0, target])
         # backward
-        dWxh, dWhh, dWhy = np.zeros_like(Wxh), np.zeros_like(Whh), np.zeros_like(Why)
-        dbh, dby = np.zeros_like(bh), np.zeros_like(by)
+        dWxh, dWhh, dWhy = np.zeros_like(self.w_xh), np.zeros_like(self.w_hh ), np.zeros_like(self.w_hy)
+        dbh, dby = np.zeros_like(self.b_h), np.zeros_like(self.b_y)
         dhnext = np.zeros_like(h[0])
         for i in reversed(xrange(len(data))):
             # backward
             dy = np.copy(predict)
             dy[ target ] -= 1       # softmax derivative
-            dWhy = np.dot(self.w_hy.T, dy))
+            dWhy = np.dot(self.w_hy.T, dy)
             dby += dy
             dh = np.dot(Why.T, dy) + dhnext
             dhraw = (1 - np.square(h[i])) * dh
