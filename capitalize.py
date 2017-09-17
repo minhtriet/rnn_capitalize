@@ -50,16 +50,16 @@ class RNN:
         for i in reversed(xrange(len(data))):
             # backward
             dy = np.copy(predict)
-            dy[ target ] -= 1       # softmax derivative
-            dWhy = np.dot(self.w_hy.T, dy)
+            dy[0][ target ] -= 1       # softmax derivative
+            dWhy = np.dot(dy, self.w_hy.T)
             dby += dy
-            dh = np.dot(Why.T, dy) + dhnext
+            dh = np.dot(dy, self.w_hy.T) + dhnext
             dhraw = (1 - np.square(h[i])) * dh
             dbh += dhraw
-            dWxh = 1 - np.square(h[i]) * x[i]
-            dWxh += np.dot(dhraw, xs[t].T)
-            dWhh += np.dot(dhraw, hs[t-1].T)
-            dhnext = np.dot(Whh.T, dhraw)
+            dWxh = x[i].T * (1 - np.square(h[i]))
+            dWxh += np.dot(x[i].T, dhraw)
+            dWhh += np.dot(dhraw, h[i-1].T)
+            dhnext = np.dot(dhraw, self.w_hh.T)
         self.w_xh += ETA*dWxh
         self.w_hh += ETA*dWhh
         self.w_hy += ETA*dWhy
